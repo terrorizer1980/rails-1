@@ -433,8 +433,18 @@ module ActiveRecord
     def joins!(*args) # :nodoc:
       args.compact!
       args.flatten!
-      self.joins_values += args
+      self.joins_values += build_join(args)
       self
+    end
+
+    def build_join(args)
+      first, *rest = args
+
+      if first.is_a?(String) && rest.is_a?(Array) && rest.length == 1
+        [@klass.send(:sanitize_sql, args)]
+      else
+        args
+      end
     end
 
     def bind(value) # :nodoc:
